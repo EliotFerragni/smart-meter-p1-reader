@@ -1,0 +1,15 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+  "cmake.configureOnOpen": true,
+  "idf.adapterTargetName": "esp32h2",
+  "idf.openOcdConfigs": [
+    "board/esp32h2-builtin.cfg"
+  ],
+  "idf.flashType": "UART",
+  "idf.port": "/dev/tty.usbmodem14301",
+  "files.associations": {
+    "esp_intr_alloc.h": "c",
+    "esp_zb_light.h": "c",
+    "gpio.h": "c"
+  }
+}
