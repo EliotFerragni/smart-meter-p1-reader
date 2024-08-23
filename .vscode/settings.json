@@ -6,10 +6,11 @@
     "board/esp32h2-builtin.cfg"
   ],
   "idf.flashType": "UART",
-  "idf.port": "/dev/tty.usbmodem14301",
+  "idf.port": "/dev/tty.usbmodem14401",
   "files.associations": {
     "esp_intr_alloc.h": "c",
     "esp_zb_light.h": "c",
-    "gpio.h": "c"
+    "gpio.h": "c",
+    "esp_zigbee_ha_standard.h": "c"
   }
 }

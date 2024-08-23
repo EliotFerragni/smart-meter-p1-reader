@@ -1,6 +1,10 @@
 idf_component_register(
     SRCS
-    "esp_zb_light.c"
+    "hdlc_parser.cpp"
     "light_driver.c"
+    "main.c"
+    "smartmeter_reader.c"
+    "zigbee_meter.c"
+    "zigbee.c"
     INCLUDE_DIRS "."
 )
