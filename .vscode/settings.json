@@ -12,5 +12,8 @@
     "esp_zb_light.h": "c",
     "gpio.h": "c",
     "esp_zigbee_ha_standard.h": "c"
-  }
+  },
+  "cSpell.words": [
+    "smartmeter"
+  ]
 }

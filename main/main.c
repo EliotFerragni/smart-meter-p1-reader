@@ -61,7 +61,7 @@ static void config_button(void)
 void app_main(void)
 {
     zigbee_init();
-    // light_driver_init(LIGHT_DEFAULT_OFF);
+    // light_driver_init(false, GPIO_NUM_8, 1);
     config_button();
     smartmeter_reader_init();
 }

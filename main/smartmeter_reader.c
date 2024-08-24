@@ -20,7 +20,7 @@
 #include "hdlc_parser.h"
 
 #define UART_TXD (UART_PIN_NO_CHANGE)
-#define UART_RXD (22)
+#define UART_RXD (GPIO_NUM_22)
 #define UART_RTS (UART_PIN_NO_CHANGE)
 #define UART_CTS (UART_PIN_NO_CHANGE)
 
@@ -28,7 +28,7 @@
 
 #define UART_PORT_NUM (1)
 
-static const char *TAG = "UART TEST";
+#define SMARTMETER_FRAME_SIZE 380 // my smartmeter sends frames of 380 bytes each 5sec
 
 #define BUF_SIZE (1024)
 
@@ -52,11 +52,11 @@ static void reader_task(void *arg)
     io_conf.pin_bit_mask = (1 << DATA_REQ_GPIO);
     // disable pull-down mode
     io_conf.pull_down_en = 0;
-    // interrupt of rising edge
+    // no interrupt
     io_conf.intr_type = GPIO_INTR_DISABLE;
-    // set as input mode
+    // set as output mode
     io_conf.mode = GPIO_MODE_OUTPUT;
-    // enable pull-up mode
+    // disable pull-up mode
     io_conf.pull_up_en = 0;
     gpio_config(&io_conf);
 
@@ -72,26 +72,20 @@ static void reader_task(void *arg)
 
     gpio_set_level(DATA_REQ_GPIO, 1);
 
-    // Configure a temporary buffer for the incoming data
+    // Configure a buffer for the incoming data
     uint8_t *data = (uint8_t *)malloc(BUF_SIZE);
 
-    //read loop
+    // Read loop
     while (1)
     {
         // Read data from the UART
-        int len = uart_read_bytes(UART_PORT_NUM, data, 380, pdMS_TO_TICKS(6000));
+        int len = uart_read_bytes(UART_PORT_NUM, data, SMARTMETER_FRAME_SIZE, pdMS_TO_TICKS(6000));
 
         if (len)
         {
-            ESP_LOGI(TAG, "Recv len = %d", len);
             DataParsed parsedData = {0};
             parseHdlc(data, len, &parsedData);
             zb_update_total_active_power(parsedData.outputW - parsedData.inputW);
-
-            printf("inputW         = %ld\n", parsedData.inputW);
-            printf("outputW        = %ld\n", parsedData.outputW);
-            printf("totalInputKWh  = %ld\n", parsedData.totalInputKWh);
-            printf("totalOutputKWh = %ld\n", parsedData.totalOutputKWh);
         }
     }
 }

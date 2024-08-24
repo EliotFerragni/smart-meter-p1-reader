@@ -1,5 +1,5 @@
 /**
- * taken from https://github.com/Tropaion/ZigBee_SmartMeter_Reader/blob/main/software/zigbee/components/zigbee_electricity_meter/src/zb_electricity_meter.c
+ * Inpired by https://github.com/Tropaion/ZigBee_SmartMeter_Reader/blob/main/software/zigbee/components/zigbee_electricity_meter/src/zb_electricity_meter.c
  */
 
 #include <stdio.h>
@@ -15,19 +15,16 @@ static const char* TAG = "zb_meter";
 #define BASIC_APPLICATION_VERSION           ESP_ZB_ZCL_BASIC_APPLICATION_VERSION_DEFAULT_VALUE
 #define BASIC_STACK_VERSION                 ESP_ZB_ZCL_BASIC_STACK_VERSION_DEFAULT_VALUE
 #define BASIC_HW_VERSION                    ESP_ZB_ZCL_BASIC_HW_VERSION_DEFAULT_VALUE
-#define BASIC_MANUFACTURER_NAME             " Eliot Ferragni"  /* < Reserve first char for the size of string */
-#define BASIC_MANUFACTURER_NAME_SIZE        0x0E                    /* < Size of BASIC_MANUFACTURER_NAME without first space */
-#define BASIC_MODEL_NAME                    " SmartMeter"           /* < Reserve first char for the size of string */
-#define BASIC_MODEL_NAME_SIZE               0x0A                    /* < Size of BASIC_MODEL_NAME without first space */
-#define BASIC_POWER_SOURCE                  0x04                    /* < DC Power Source */
+#define BASIC_MANUFACTURER_NAME             " Eliot Ferragni"                       /* < Reserve first char for the size of string */
+#define BASIC_MANUFACTURER_NAME_SIZE        (sizeof(BASIC_MANUFACTURER_NAME) - 2)   /* < Size of BASIC_MANUFACTURER_NAME without first space */
+#define BASIC_MODEL_NAME                    " SmartMeter"                           /* < Reserve first char for the size of string */
+#define BASIC_MODEL_NAME_SIZE               (sizeof(BASIC_MODEL_NAME) - 2)          /* < Size of BASIC_MODEL_NAME without first space */
+#define BASIC_POWER_SOURCE                  0x04                                    /* < DC Power Source */
 #define HA_DLMS_ENDPOINT                    1
 
 /* Values for identify cluster */
 #define IDENTIFY_IDENTIFY_TIME              ESP_ZB_ZCL_IDENTIFY_IDENTIFY_TIME_DEFAULT_VALUE
 
-/* Values for electrical measurement cluster */
-#define ELECTRICAL_MEASUREMENT_RMS_VOLTAGE  0xFFFF                  /* < Default value from specification */
-#define ELECTRICAL_MEASUREMENT_RMS_CURRENT  0xFFFF                  /* < Default value from specification */
 
 /* Initial command to request attribute report */
 static esp_zb_zcl_report_attr_cmd_t electrical_measurement_cmd_req = {
@@ -37,13 +34,12 @@ static esp_zb_zcl_report_attr_cmd_t electrical_measurement_cmd_req = {
         .cluster_role = ESP_ZB_ZCL_CLUSTER_SERVER_ROLE
     };
 
-/* ===== FUNCTIONS TO UPDATE AND SEND CLUSTER VALUES ===== */
 esp_err_t zb_update_total_active_power(int32_t power)
 {
-    /* Set attribute request to total active power */
+    /* Set attribute request to active power */
     electrical_measurement_cmd_req.attributeID = ESP_ZB_ZCL_ATTR_ELECTRICAL_MEASUREMENT_ACTIVE_POWER_ID;
 
-    /* Write new local total active power */
+    /* Write new local active power */
     esp_zb_zcl_status_t state = esp_zb_zcl_set_attribute_val(electrical_measurement_cmd_req.zcl_basic_cmd.src_endpoint,
                                                              electrical_measurement_cmd_req.clusterID,
                                                              electrical_measurement_cmd_req.cluster_role,
@@ -52,7 +48,7 @@ esp_err_t zb_update_total_active_power(int32_t power)
     /* Check for error */
     if(state != ESP_ZB_ZCL_STATUS_SUCCESS)
     {
-        ESP_LOGE(TAG, "Setting total active power attribute failed!");
+        ESP_LOGE(TAG, "Setting active power attribute failed!");
         return ESP_FAIL;
     }
 
@@ -62,17 +58,13 @@ esp_err_t zb_update_total_active_power(int32_t power)
     /* Check for error */
     if(state != ESP_ZB_ZCL_STATUS_SUCCESS)
     {
-        ESP_LOGE(TAG, "Sending total active power attribute report command failed!");
+        ESP_LOGE(TAG, "Sending active power attribute report command failed!");
         return ESP_FAIL;
     }
     
     return ESP_OK;
 }
 
-
-//TODO: Identify Callback
-/* ===== FUNCTION TO CREATE ENDPOINTS ===== */
-// Create endpoint for electricity meter
 void zb_electricity_meter_ep(esp_zb_ep_list_t *esp_zb_ep_list)
 {
     /* ===== CREATE BASIC CLUSTER (REQUIRED) (0x0000) ===== */
@@ -119,14 +111,13 @@ void zb_electricity_meter_ep(esp_zb_ep_list_t *esp_zb_ep_list)
     esp_zb_attribute_list_t *esp_zb_electrical_measurement_cluster = esp_zb_zcl_attr_list_create(ESP_ZB_ZCL_CLUSTER_ID_ELECTRICAL_MEASUREMENT);
 
     /* == Attribute Set 0x00: Basic Information (S. 299) == */
-    //TODO: Add attribute MeasurementType (0x0000) */
+    // Table 4-28. MeasurementType Attribute from https://zigbeealliance.org/wp-content/uploads/2019/12/07-5123-06-zigbee-cluster-library-specification.pdf
     uint32_t measurement_type = (1 << 3);
     ESP_ERROR_CHECK(esp_zb_electrical_meas_cluster_add_attr(esp_zb_electrical_measurement_cluster, ESP_ZB_ZCL_ATTR_ELECTRICAL_MEASUREMENT_MEASUREMENT_TYPE_ID, &measurement_type));
 
-    /* == Attribute Set 0x03: AC (Non-phase Specific) Measurements (S. 303) == */
-    /* Add attribute TotalActivePower (0x0304) */
-    int32_t total_active_power = 0;
-    ESP_ERROR_CHECK(esp_zb_electrical_meas_cluster_add_attr(esp_zb_electrical_measurement_cluster, ESP_ZB_ZCL_ATTR_ELECTRICAL_MEASUREMENT_ACTIVE_POWER_ID, &total_active_power));
+    /* Add attribute ActivePower (0x050B) */
+    int32_t active_power = 0;
+    ESP_ERROR_CHECK(esp_zb_electrical_meas_cluster_add_attr(esp_zb_electrical_measurement_cluster, ESP_ZB_ZCL_ATTR_ELECTRICAL_MEASUREMENT_ACTIVE_POWER_ID, &active_power));
 
     /* === CREATE METERING CLUSTER (0x0702) === */
     //TODO: Cluster still not implemented in ZigBee SDK: https://github.com/espressif/esp-zigbee-sdk/issues/36
@@ -147,22 +138,4 @@ void zb_electricity_meter_ep(esp_zb_ep_list_t *esp_zb_ep_list)
 
     /* === ADD CREATED ENDPOINT TO LIST === */
     ESP_ERROR_CHECK(esp_zb_ep_list_add_ep(esp_zb_ep_list, esp_zb_cluster_list, HA_DLMS_ENDPOINT, ESP_ZB_AF_HA_PROFILE_ID, ESP_ZB_HA_METER_INTERFACE_DEVICE_ID));
-
-    // /* Config the reporting info  */
-    // esp_zb_zcl_reporting_info_t reporting_info = {
-    //     .direction = ESP_ZB_ZCL_CMD_DIRECTION_TO_SRV,
-    //     .ep = HA_DLMS_ENDPOINT,
-    //     .cluster_id = ESP_ZB_ZCL_CLUSTER_ID_ELECTRICAL_MEASUREMENT,
-    //     .cluster_role = ESP_ZB_ZCL_CLUSTER_SERVER_ROLE,
-    //     .dst.profile_id = ESP_ZB_AF_HA_PROFILE_ID,
-    //     .u.send_info.min_interval = 1,
-    //     .u.send_info.max_interval = 0,
-    //     .u.send_info.def_min_interval = 1,
-    //     .u.send_info.def_max_interval = 0,
-    //     .u.send_info.delta.u16 = 100,
-    //     .attr_id = ESP_ZB_ZCL_ATTR_ELECTRICAL_MEASUREMENT_ACTIVE_POWER_ID,
-    //     .manuf_code = ESP_ZB_ZCL_ATTR_NON_MANUFACTURER_SPECIFIC,
-    // };
-
-    // esp_zb_zcl_update_reporting_info(&reporting_info);
 }

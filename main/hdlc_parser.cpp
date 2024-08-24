@@ -1,5 +1,4 @@
 #include <cstring>
-#include <algorithm>
 #include <iterator>
 
 #include "hdlc_parser.h"
@@ -7,60 +6,79 @@
 #ifdef __cplusplus
 extern "C"
 {
+#endif
 #include <stdio.h>
+#ifdef __cplusplus
 }
 #endif
 
 namespace
 {
-    const uint8_t inputW[6] = {0x01, 0x00, 0x01, 0x07, 0x00, 0xFF};
-    const uint8_t outputW[6] = {0x01, 0x00, 0x02, 0x07, 0x00, 0xFF};
-    const uint8_t totalInputKWh[6] = {0x01, 0x00, 0x01, 0x08, 0x00, 0xFF};
-    const uint8_t totalOutputKWh[6] = {0x01, 0x00, 0x02, 0x08, 0x00, 0xFF};
+    // OBIS codes
+    const uint8_t INPUT_W[] = {0x01, 0x00, 0x01, 0x07, 0x00, 0xFF}; // 1.0.1.7.0.255
+    const uint8_t OUTPUT_W[] = {0x01, 0x00, 0x02, 0x07, 0x00, 0xFF}; // 1.0.2.7.0.255
+    const uint8_t TOTAL_INPUT_WH[] = {0x01, 0x00, 0x01, 0x08, 0x00, 0xFF}; // 1.0.1.8.0.255
+    const uint8_t TOTAL_OUTPU_WH[] = {0x01, 0x00, 0x02, 0x08, 0x00, 0xFF}; // 1.0.2.8.0.255
 
-    const std::string inputWStr(inputW, inputW + 6);
-    const std::string outputWStr(outputW, outputW + 6);
-    const std::string totalInputKWhStr(totalInputKWh, totalInputKWh + 6);
-    const std::string totalOutputKWhStr(totalOutputKWh, totalOutputKWh + 6);
+    const std::string INPUT_W_STR(INPUT_W, INPUT_W + sizeof(INPUT_W));
+    const std::string OUTPUT_W_STR(OUTPUT_W, OUTPUT_W + sizeof(OUTPUT_W));
+    const std::string TOTAL_INPUT_WH_STR(TOTAL_INPUT_WH, TOTAL_INPUT_WH + sizeof(TOTAL_INPUT_WH));
+    const std::string TOTAL_OUPTUT_WH_STR(TOTAL_OUTPU_WH, TOTAL_OUTPU_WH + sizeof(TOTAL_OUTPU_WH));
 
-    const uint8_t dataOffset = 8;
-}
+    const uint8_t DATA_OFFSET = 8;
 
-uint32_t val32FromBuffer(uint8_t* buf)
-{
-    return (*(buf) << 24) + (*(buf+1) << 16) + (*(buf+2) << 8) + (*(buf+3));
-}
-
-bool findField(const std::string pattern, const std::string buf, size_t &foundPos)
-{
-    foundPos = buf.find(pattern);
-    if (foundPos == std::string::npos)
+    /**
+     * @brief Read the given buffer to extract the uint32_t value
+     * 
+     * @param buf Buffer of at least uint32_t size
+     * @return uint32_t value read from buffer
+     */
+    uint32_t uint32FromBuffer(const uint8_t* buf)
     {
-        // not found
-        return false;
+        return (*(buf) << 24) + (*(buf+1) << 16) + (*(buf+2) << 8) + (*(buf+3));
     }
-    // found
-    return true;
+
+    bool findField(const std::string& pattern, const std::string& buf, size_t &foundPos)
+    {   
+        // - 1 to correspond to the index
+        foundPos = buf.find(pattern) - 1;
+        if (foundPos == std::string::npos)
+        {
+            // not found
+            return false;
+        }
+        // found
+        return true;
+    }
 }
 
+/**
+ * Works with HDLC/DLSM/COSEM frames.
+ * Strictly speaking, it doesn't decode the HDLC frames, nor the DLSM. In fact we don't care about HDLC overhead or DLSM format. 
+ * The only things interesting are the values we want. So search for the OBIS field of the values and extract only the corresponding value.
+ * 
+ * To add others fields, dump frames from your smartmeter, parse them with https://www.gurux.fi/GuruxDLMSTranslator under Messages, 
+ * then find the OBIS code corresponding to the wanted value. The value will be DATA_OFFSET after the the OBIS field.
+ * If the frames ares encrypted, you need to decrypt them before being able to use this function.
+ */
 void parseHdlc(uint8_t* buf, uint16_t len, DataParsed* result)
 {
-    size_t pos;
+    size_t index;
     std::string buffer(buf, buf + len);
-    if (findField(inputWStr, buffer, pos))
+    if (findField(INPUT_W_STR, buffer, index))
     {
-        result->inputW = val32FromBuffer(&buf[pos-1 + dataOffset]);
+        result->inputW = uint32FromBuffer(&buf[index + DATA_OFFSET]);
     }
-    if (findField(outputWStr, buffer, pos))
+    if (findField(OUTPUT_W_STR, buffer, index))
     {
-        result->outputW = val32FromBuffer(&buf[pos-1 + dataOffset]);
+        result->outputW = uint32FromBuffer(&buf[index + DATA_OFFSET]);
     }
-    if (findField(totalInputKWhStr, buffer, pos))
+    if (findField(TOTAL_INPUT_WH_STR, buffer, index))
     {
-        result->totalInputKWh = val32FromBuffer(&buf[pos-1 + dataOffset]);
+        result->totalInputWh = uint32FromBuffer(&buf[index + DATA_OFFSET]);
     }
-    if (findField(totalOutputKWhStr, buffer, pos))
+    if (findField(TOTAL_OUPTUT_WH_STR, buffer, index))
     {
-        result->totalOutputKWh = val32FromBuffer(&buf[pos-1 + dataOffset]);
+        result->totalOutputWh = uint32FromBuffer(&buf[index + DATA_OFFSET]);
     }
 }

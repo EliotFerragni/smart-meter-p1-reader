@@ -40,4 +40,8 @@
         .host_connection_mode = HOST_CONNECTION_MODE_NONE,      \
     }
 
+/**
+ * @brief Init zigbee stack
+ * 
+ */
 void zigbee_init(void);

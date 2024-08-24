@@ -1,17 +1,3 @@
-/*
- * SPDX-FileCopyrightText: 2021-2024 Espressif Systems (Shanghai) CO LTD
- *
- * SPDX-License-Identifier: CC0-1.0
- *
- * Zigbee HA_on_off_light Example
- *
- * This example code is in the Public Domain (or CC0 licensed, at your option.)
- *
- * Unless required by applicable law or agreed to in writing, this
- * software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
- * CONDITIONS OF ANY KIND, either express or implied.
- */
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -25,10 +11,10 @@
 #include "zigbee_meter.h"
 
 #if !defined ZB_ED_ROLE
-#error Define ZB_ED_ROLE in idf.py menuconfig to compile light (End Device) source code.
+#error Define ZB_ED_ROLE in idf.py menuconfig to compile (End Device) source code.
 #endif
 
-static const char *TAG = "SMARTMETER";
+static const char *TAG = "zb";
 /********************* Define functions **************************/
 static void bdb_start_top_level_commissioning_cb(uint8_t mode_mask)
 {
@@ -73,16 +59,6 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct)
             esp_zb_scheduler_alarm((esp_zb_callback_t)bdb_start_top_level_commissioning_cb, ESP_ZB_BDB_MODE_NETWORK_STEERING, 1000);
         }
         break;
-    // case ESP_ZB_ZDO_SIGNAL_LEAVE:
-    //     esp_zb_zdo_signal_leave_params_t *leave_params = (esp_zb_zdo_signal_leave_params_t *)esp_zb_app_signal_get_params(p_sg_p);
-    //     /* Leave request from coordinator */
-    //     if (leave_params->leave_type == ESP_ZB_NWK_LEAVE_TYPE_RESET) {
-    //         ESP_LOGI(TAG, "Resetting device because of external leave request");
-
-    //         /* Factory reset, performs leave procedure */
-    //         esp_zb_factory_reset();
-    //     }
-    //     break;
     default:
         ESP_LOGI(TAG, "ZDO signal: %s (0x%x), status: %s", esp_zb_zdo_signal_to_string(sig_type), sig_type,
                  esp_err_to_name(err_status));

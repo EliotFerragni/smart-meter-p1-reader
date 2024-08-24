@@ -4,32 +4,25 @@
 #include <stdbool.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-/* light intensity level */
-#define LIGHT_DEFAULT_ON  1
-#define LIGHT_DEFAULT_OFF 0
+/**
+ * @brief Set light power (on/off).
+ *
+ * @param  power  The light power to be set
+ */
+void light_driver_enable(bool enable);
 
-/* LED strip configuration */
-#define CONFIG_EXAMPLE_STRIP_LED_GPIO   8
-#define CONFIG_EXAMPLE_STRIP_LED_NUMBER 1
+bool light_driver_get_enable(void);
 
 /**
-* @brief Set light power (on/off).
-*
-* @param  power  The light power to be set
-*/
-void light_driver_set_power(bool power);
-
-bool light_driver_get_power(void);
-
-/**
-* @brief color light driver init, be invoked where you want to use color light
-*
-* @param power power on/off
-*/
-void light_driver_init(bool power);
+ * @brief color light driver init, be invoked where you want to use color light
+ *
+ * @param power power on/off
+ */
+void light_driver_init(bool enable, uint32_t gpio, uint32_t num_leds);
 
 #ifdef __cplusplus
 } // extern "C"
