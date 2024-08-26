@@ -1,6 +1,6 @@
 idf_component_register(
     SRCS
-    "hdlc_parser.cpp"
+    "hdlc_data_extractor.cpp"
     "light_driver.c"
     "main.c"
     "smartmeter_reader.c"

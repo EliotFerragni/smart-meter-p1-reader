@@ -2,12 +2,6 @@
 #pragma once
 
 #include <stdbool.h>
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 /**
  * @brief Set light power (on/off).
  *
@@ -23,7 +17,3 @@ bool light_driver_get_enable(void);
  * @param power power on/off
  */
 void light_driver_init(bool enable, uint32_t gpio, uint32_t num_leds);
-
-#ifdef __cplusplus
-} // extern "C"
-#endif

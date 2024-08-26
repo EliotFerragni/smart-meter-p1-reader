@@ -1,5 +1,5 @@
 /**
- * Inpired by https://github.com/Tropaion/ZigBee_SmartMeter_Reader/blob/main/software/zigbee/components/zigbee_electricity_meter/src/zb_electricity_meter.c
+ * Inspired by https://github.com/Tropaion/ZigBee_SmartMeter_Reader/blob/main/software/zigbee/components/zigbee_electricity_meter/src/zb_electricity_meter.c
  */
 
 #include <stdio.h>

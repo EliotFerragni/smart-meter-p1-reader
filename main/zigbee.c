@@ -1,13 +1,10 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/queue.h"
 #include "esp_check.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "ha/esp_zigbee_ha_standard.h"
 #include "zigbee.h"
-#include "driver/gpio.h"
-#include "light_driver.h"
 #include "zigbee_meter.h"
 
 #if !defined ZB_ED_ROLE

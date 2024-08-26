@@ -1,0 +1,36 @@
+menu "Ports and peripherals settings"
+
+    orsource "$IDF_PATH/examples/common_components/env_caps/$IDF_TARGET/Kconfig.env_caps"
+
+    config UART_PORT_NUM
+        int "UART port number"
+        range 0 2 if IDF_TARGET_ESP32 || IDF_TARGET_ESP32S3
+        default 2 if IDF_TARGET_ESP32 || IDF_TARGET_ESP32S3
+        range 0 1
+        default 1
+        help
+            UART communication port number.
+            See UART documentation for available port numbers.
+
+    config UART_RX_PIN
+        int "UART rx pin number"
+        range ENV_GPIO_RANGE_MIN ENV_GPIO_IN_RANGE_MAX
+        default ENV_GPIO_RANGE_MIN
+        help
+            UART rx pin to use.
+
+    config SMARTMETER_DATA_REQ_PIN
+        int "smartmeter data req pin"
+        range ENV_GPIO_RANGE_MIN ENV_GPIO_IN_RANGE_MAX
+        default ENV_GPIO_RANGE_MIN
+        help
+            Pin to use to enable the data output of the smartmeter.
+
+    config UART_BAUDRATE
+        int "UART communication speed"
+        range 1200 115200
+        default 115200
+        help
+            UART communication speed.
+
+endmenu

@@ -7,26 +7,21 @@
    CONDITIONS OF ANY KIND, either express or implied.
 */
 #include <stdio.h>
-#include <string.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "driver/uart.h"
 #include "driver/gpio.h"
-#include "sdkconfig.h"
 #include "esp_log.h"
 #include "zigbee_meter.h"
 #include "smartmeter_reader.h"
-
-#include "hdlc_parser.h"
+#include "hdlc_data_extractor.h"
 
 #define UART_TXD (UART_PIN_NO_CHANGE)
-#define UART_RXD (GPIO_NUM_22)
+#define UART_RXD (CONFIG_UART_RX_PIN)
 #define UART_RTS (UART_PIN_NO_CHANGE)
 #define UART_CTS (UART_PIN_NO_CHANGE)
 
-#define DATA_REQ_GPIO (GPIO_NUM_8)
+#define DATA_REQ_GPIO (CONFIG_SMARTMETER_DATA_REQ_PIN)
 
-#define UART_PORT_NUM (1)
+#define UART_PORT_NUM (CONFIG_UART_PORT_NUM)
 
 #define SMARTMETER_FRAME_SIZE 380 // my smartmeter sends frames of 380 bytes each 5sec
 
@@ -37,7 +32,7 @@ static void reader_task(void *arg)
     /* Configure parameters of an UART driver,
      * communication pins and install the driver */
     uart_config_t uart_config = {
-        .baud_rate = 115200,
+        .baud_rate = CONFIG_UART_BAUDRATE,
         .data_bits = UART_DATA_8_BITS,
         .parity = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1,
@@ -83,9 +78,9 @@ static void reader_task(void *arg)
 
         if (len)
         {
-            DataParsed parsedData = {0};
-            parseHdlc(data, len, &parsedData);
-            zb_update_total_active_power(parsedData.outputW - parsedData.inputW);
+            ExtractedData extractedData = {0};
+            extractData(data, len, &extractedData);
+            zb_update_total_active_power(extractedData.outputW - extractedData.inputW);
         }
     }
 }

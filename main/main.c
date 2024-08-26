@@ -1,9 +1,3 @@
-
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "esp_check.h"
-#include "esp_log.h"
 #include "zigbee.h"
 #include "driver/gpio.h"
 #include "light_driver.h"
