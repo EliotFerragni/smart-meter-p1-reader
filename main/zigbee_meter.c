@@ -66,76 +66,49 @@ esp_err_t zb_update_total_active_power(int32_t power)
 }
 
 void zb_electricity_meter_ep(esp_zb_ep_list_t *esp_zb_ep_list)
-{
-    /* ===== CREATE BASIC CLUSTER (REQUIRED) (0x0000) ===== */
-    esp_zb_attribute_list_t *esp_zb_basic_cluster = esp_zb_zcl_attr_list_create(ESP_ZB_ZCL_CLUSTER_ID_BASIC);
+{   
+    // cluster list
+    esp_zb_cluster_list_t *esp_zb_cluster_list = esp_zb_zcl_cluster_list_create();
 
-    /* Add attribute zcl_version (0x0000) */
+    // basic cluster
+    esp_zb_attribute_list_t *esp_zb_basic_cluster = esp_zb_zcl_attr_list_create(ESP_ZB_ZCL_CLUSTER_ID_BASIC);
     uint8_t zcl_version = BASIC_ZCL_VERSION;
     ESP_ERROR_CHECK(esp_zb_basic_cluster_add_attr(esp_zb_basic_cluster, ESP_ZB_ZCL_ATTR_BASIC_ZCL_VERSION_ID, &zcl_version));
-
-    /* Add attribute application_version (0x0001) */
     uint8_t application_version = BASIC_APPLICATION_VERSION;
     ESP_ERROR_CHECK(esp_zb_basic_cluster_add_attr(esp_zb_basic_cluster, ESP_ZB_ZCL_ATTR_BASIC_APPLICATION_VERSION_ID, &application_version));
-
-    /* Add attribute stack_version (0x0002) */
     uint8_t stack_version = BASIC_STACK_VERSION;
     ESP_ERROR_CHECK(esp_zb_basic_cluster_add_attr(esp_zb_basic_cluster, ESP_ZB_ZCL_ATTR_BASIC_STACK_VERSION_ID, &stack_version));
-
-    /* Add attribute hw_version (0x0003) */
     uint8_t hw_version = BASIC_HW_VERSION;
     ESP_ERROR_CHECK(esp_zb_basic_cluster_add_attr(esp_zb_basic_cluster, ESP_ZB_ZCL_ATTR_BASIC_HW_VERSION_ID, &hw_version));
-
-    /* Add attribute manufacturer_name (0x0004) */
     char manufacturer_name[BASIC_MANUFACTURER_NAME_SIZE + 1] = BASIC_MANUFACTURER_NAME;
     manufacturer_name[0] = BASIC_MANUFACTURER_NAME_SIZE;
     ESP_ERROR_CHECK(esp_zb_basic_cluster_add_attr(esp_zb_basic_cluster, ESP_ZB_ZCL_ATTR_BASIC_MANUFACTURER_NAME_ID, &manufacturer_name[0]));
-
-    /* Add attribute model_identifier (0x0005) */
     char model_identifier[BASIC_MODEL_NAME_SIZE + 1] = BASIC_MODEL_NAME;
     model_identifier[0] = BASIC_MODEL_NAME_SIZE;
     ESP_ERROR_CHECK(esp_zb_basic_cluster_add_attr(esp_zb_basic_cluster, ESP_ZB_ZCL_ATTR_BASIC_MODEL_IDENTIFIER_ID, &model_identifier[0]));
-
-    /* Add attribute power_source (0x0007) */
     uint8_t power_source = BASIC_POWER_SOURCE;
     ESP_ERROR_CHECK(esp_zb_basic_cluster_add_attr(esp_zb_basic_cluster, ESP_ZB_ZCL_ATTR_BASIC_POWER_SOURCE_ID, &power_source));
+    ESP_ERROR_CHECK(esp_zb_cluster_list_add_basic_cluster(esp_zb_cluster_list, esp_zb_basic_cluster, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
 
-    /* ===== CREATE IDENTITY CLUSTER (REQUIRED) (0x0003) ===== */
+    // identify cluster
     esp_zb_attribute_list_t *esp_zb_identify_cluster = esp_zb_zcl_attr_list_create(ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY);
-
-    /* Add attribute identify_time (0x0000) */
     uint16_t identify_time = IDENTIFY_IDENTIFY_TIME;
     ESP_ERROR_CHECK(esp_zb_identify_cluster_add_attr(esp_zb_identify_cluster, ESP_ZB_ZCL_ATTR_IDENTIFY_IDENTIFY_TIME_ID, &identify_time));
+    ESP_ERROR_CHECK(esp_zb_cluster_list_add_identify_cluster(esp_zb_cluster_list, esp_zb_identify_cluster, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
 
-    /* ===== CREATE ELECTRICAL MEASUREMENT CLUSTER (0x0B04)=====*/
+    // electrical measurement cluster
     esp_zb_attribute_list_t *esp_zb_electrical_measurement_cluster = esp_zb_zcl_attr_list_create(ESP_ZB_ZCL_CLUSTER_ID_ELECTRICAL_MEASUREMENT);
-
-    /* == Attribute Set 0x00: Basic Information (S. 299) == */
     // Table 4-28. MeasurementType Attribute from https://zigbeealliance.org/wp-content/uploads/2019/12/07-5123-06-zigbee-cluster-library-specification.pdf
     uint32_t measurement_type = (1 << 3);
     ESP_ERROR_CHECK(esp_zb_electrical_meas_cluster_add_attr(esp_zb_electrical_measurement_cluster, ESP_ZB_ZCL_ATTR_ELECTRICAL_MEASUREMENT_MEASUREMENT_TYPE_ID, &measurement_type));
-
-    /* Add attribute ActivePower (0x050B) */
     int32_t active_power = 0;
     ESP_ERROR_CHECK(esp_zb_electrical_meas_cluster_add_attr(esp_zb_electrical_measurement_cluster, ESP_ZB_ZCL_ATTR_ELECTRICAL_MEASUREMENT_ACTIVE_POWER_ID, &active_power));
-
-    /* === CREATE METERING CLUSTER (0x0702) === */
-    //TODO: Cluster still not implemented in ZigBee SDK: https://github.com/espressif/esp-zigbee-sdk/issues/36
-
-    /* === CREATE CLUSTER CLIENT ROLES === */
-    esp_zb_attribute_list_t *esp_zb_identify_client_cluster = esp_zb_zcl_attr_list_create(ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY);
-
-    /* === CREATE CLUSTER LIST === */
-    esp_zb_cluster_list_t *esp_zb_cluster_list = esp_zb_zcl_cluster_list_create();
-
-    /* Server clusters */
-    ESP_ERROR_CHECK(esp_zb_cluster_list_add_basic_cluster(esp_zb_cluster_list, esp_zb_basic_cluster, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
-    ESP_ERROR_CHECK(esp_zb_cluster_list_add_identify_cluster(esp_zb_cluster_list, esp_zb_identify_cluster, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
     ESP_ERROR_CHECK(esp_zb_cluster_list_add_electrical_meas_cluster(esp_zb_cluster_list, esp_zb_electrical_measurement_cluster, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
 
-    /* Client clusters */
+    // identify client cluster
+    esp_zb_attribute_list_t *esp_zb_identify_client_cluster = esp_zb_zcl_attr_list_create(ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY);
     ESP_ERROR_CHECK(esp_zb_cluster_list_add_identify_cluster(esp_zb_cluster_list, esp_zb_identify_client_cluster, ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE));
 
-    /* === ADD CREATED ENDPOINT TO LIST === */
+    // Add everything to endpoint
     ESP_ERROR_CHECK(esp_zb_ep_list_add_ep(esp_zb_ep_list, esp_zb_cluster_list, HA_DLMS_ENDPOINT, ESP_ZB_AF_HA_PROFILE_ID, ESP_ZB_HA_METER_INTERFACE_DEVICE_ID));
 }
