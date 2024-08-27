@@ -200,7 +200,7 @@ I could take time to write the code to validate the HDLC frames, extract their d
 
 ### Simple value extraction example
 
-Here is a example of data extraction done in the code. The OBIS codes for **Active power+** and **Active power-**  and their related values are found in the stream below:
+Here is a example of data extraction done by the code. The OBIS codes for **Active power+** and **Active power-**  and their related values are found in the stream below:
 
 7EA8A4CF0223039996E6E7000F000002F10C07E808130114210A00FF88800210020209060000600100FF0908FFFFFFFFFFFFFFFFF020209060000600101FF0907FFFFFFFFFFFFFFFFF02030906`0100010700FF`06`00000000`02020F00161B02030906`0100020700FF`06`00000043`02020F00161B020309060100010800FF06000209DA02020F00161E020309060100020800FF06000028C402020F00161E02030906010020072FE07E7EA8A4CF022303999600FF12092C02020FFF1623020309060100340700FF12092302020FFF1623020309060100480700FF12093402020FFF16230203090601001F0700FF12000002020FFE1621020309060100330700FF12001202020FFE1621020309060100470700FF12004602020FFE1621020309060100010801FF060000F54E02020F00161E020309060100010802FF060001148C02020F00161E020309060100845B7E7EA02ECF022313BD61020801FF06000019B902020F00161E020309060100020802FF0600000F0B02020F00161E649A7E
 
@@ -210,9 +210,9 @@ Active power+ = 0x00000000 -> 0W
 Active power- = 0x00000043 -> 67W
 
 ### Special case
-The OBIS code 1.0.2.8.1.255 (0100020801FF) for example is not directly findable in the stream because it is splitted in two frames (the second and the third). But honestly its value is always located at the same location in the stream, thus if one wants to extract it's value, a simple look at the stream is enough to determine where is the value. Note the stream sent is always the same structure and length.  
+The OBIS code 1.0.2.8.1.255 (0100020801FF) for example is not directly findable in the stream because it is split in two frames (the second and the third). But honestly its value is always located at the same location in the stream, thus if one wants to extract its value, a simple look at the stream is enough to determine where is the value. Note the stream sent is always the same structure and length (at least with the smart meter I have).  
 
-Here is the it's value for the example.
+Here is it's value for the example.
 
 7EA8A4CF0223039996E6E7000F000002F10C07E808130114210A00FF88800210020209060000600100FF0908FFFFFFFFFFFFFFFFF020209060000600101FF0907FFFFFFFFFFFFFFFFF020309060100010700FF060000000002020F00161B020309060100020700FF060000004302020F00161B020309060100010800FF06000209DA02020F00161E020309060100020800FF06000028C402020F00161E02030906010020072FE07E7EA8A4CF022303999600FF12092C02020FFF1623020309060100340700FF12092302020FFF1623020309060100480700FF12093402020FFF16230203090601001F0700FF12000002020FFE1621020309060100330700FF12001202020FFE1621020309060100470700FF12004602020FFE1621020309060100010801FF060000F54E02020F00161E020309060100010802FF060001148C02020F00161E020309060100845B7E7EA02ECF022313BD61020801FF06`000019B9`02020F00161E020309060100020802FF0600000F0B02020F00161E649A7E
 
@@ -220,8 +220,8 @@ Here is the it's value for the example.
 The pinout follows the DSMR 5.0 [standard](docs/SPEC%20-%20E-Meter_P1_specification_20210308.pdf) (p.12).
 
 The important points are we get **5V 250mA** and **GND** pins, a **request data** pin and a **data** pin.  
-It is necessary to output a high level on the data request pin to enable the data stream, 3.3V is enough, no need to have 5V if a 3.3V board is used. Also the data pin is an open colector, thus a pull-up is needed on the board side but no need to have a level translator when a 3.3V board is used. Another unspecified thing is that the data are inverted. Thus we need to invert the UART RX on the board.
+It is necessary to output a high level on the data request pin to enable the data stream, 3.3V is enough, no need to have 5V if a 3.3V board is used. Also the data pin is an open colector, thus a pull-up is needed on the board side (internal pull-up is ok) but no need to have a level translator when a 3.3V board is used. Another unspecified thing is that the data are inverted. Thus we need to invert the UART RX on the board.
 
 # Note
 I found some projects doing parts of what I needed on Github. But all were too complicated to use, integrate or simply understand. I like when things are simple and honestly I'm quite lazy. That's why I wrote this dead simple code.  
-Honorable mention to this project https://github.com/Tropaion/ZigBee_SmartMeter_Reader which did for me the ZigBee part.
+Honorable mention to this project https://github.com/Tropaion/ZigBee_SmartMeter_Reader which  was a good start for the ZigBee endpoint declaration.
