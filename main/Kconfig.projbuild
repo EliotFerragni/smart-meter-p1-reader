@@ -33,4 +33,18 @@ menu "Ports and peripherals settings"
         help
             UART communication speed.
 
+    config LED_STRIP_PIN
+        int "led strip pin"
+        range ENV_GPIO_RANGE_MIN ENV_GPIO_IN_RANGE_MAX
+        default ENV_GPIO_RANGE_MIN
+        help
+            Pin used to control a led strip.
+    
+    config BUTTON_PIN
+        int "button pin"
+        range ENV_GPIO_RANGE_MIN ENV_GPIO_IN_RANGE_MAX
+        default ENV_GPIO_RANGE_MIN
+        help
+            Pin used by the button.
+
 endmenu
