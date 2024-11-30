@@ -105,7 +105,8 @@ static void esp_zb_task(void *pvParameters)
     /* Create endpoint list */
     esp_zb_ep_list_t *esp_zb_ep_list = esp_zb_ep_list_create();
     /* Create endpoint */
-    zb_electricity_meter_ep(esp_zb_ep_list);
+    zb_electrical_measurement_ep(esp_zb_ep_list); // endpoint 1
+    zb_metering_ep(esp_zb_ep_list);               // endpoint 2
     /* Register endpoint list to stack */
     esp_zb_device_register(esp_zb_ep_list);
 

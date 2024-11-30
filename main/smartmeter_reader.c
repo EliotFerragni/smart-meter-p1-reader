@@ -77,6 +77,8 @@ static void reader_task(void *arg)
             ExtractedData extractedData = {0};
             extractData(data, len, &extractedData);
             zb_update_total_active_power(extractedData.outputW - extractedData.inputW);
+            zb_update_delivered_power(extractedData.totalInputWh);
+            zb_update_received_power(extractedData.totalOutputWh);
             printf("inputW         = %ld\n", extractedData.inputW);
             printf("outputW        = %ld\n", extractedData.outputW);
             printf("totalInputWh   = %ld\n", extractedData.totalInputWh);
