@@ -6,7 +6,7 @@
 
 /* Setup logging */
 #include "esp_log.h"
-static const char* TAG = "zb_meter";
+static const char *TAG = "zb_meter";
 
 #include "zigbee_meter.h"
 
@@ -32,16 +32,14 @@ static esp_zb_zcl_report_attr_cmd_t electrical_measurement_cmd_req = {
     .zcl_basic_cmd.src_endpoint = HA_ELECTRICAL_MEASUREMENT_ENDPOINT,
     .address_mode = ESP_ZB_APS_ADDR_MODE_DST_ADDR_ENDP_NOT_PRESENT,
     .clusterID = ESP_ZB_ZCL_CLUSTER_ID_ELECTRICAL_MEASUREMENT,
-    .direction = ESP_ZB_ZCL_CMD_DIRECTION_TO_CLI
-};
+    .direction = ESP_ZB_ZCL_CMD_DIRECTION_TO_CLI};
 
 /* Initial command to request attribute report */
 static esp_zb_zcl_report_attr_cmd_t metering_cmd_req = {
     .zcl_basic_cmd.src_endpoint = HA_ELECTRICAL_METERING_ENDPOINT,
     .address_mode = ESP_ZB_APS_ADDR_MODE_DST_ADDR_ENDP_NOT_PRESENT,
     .clusterID = ESP_ZB_ZCL_CLUSTER_ID_METERING,
-    .direction = ESP_ZB_ZCL_CMD_DIRECTION_TO_CLI
-};
+    .direction = ESP_ZB_ZCL_CMD_DIRECTION_TO_CLI};
 
 esp_err_t zb_update_total_active_power(int32_t power)
 {
@@ -54,7 +52,7 @@ esp_err_t zb_update_total_active_power(int32_t power)
                                                              ESP_ZB_ZCL_CLUSTER_SERVER_ROLE,
                                                              ESP_ZB_ZCL_ATTR_ELECTRICAL_MEASUREMENT_ACTIVE_POWER_ID, &power, false);
     /* Check for error */
-    if(state != ESP_ZB_ZCL_STATUS_SUCCESS)
+    if (state != ESP_ZB_ZCL_STATUS_SUCCESS)
     {
         ESP_LOGE(TAG, "Setting active power attribute failed!");
         return ESP_FAIL;
@@ -64,12 +62,12 @@ esp_err_t zb_update_total_active_power(int32_t power)
     state = esp_zb_zcl_report_attr_cmd_req(&electrical_measurement_cmd_req);
 
     /* Check for error */
-    if(state != ESP_ZB_ZCL_STATUS_SUCCESS)
+    if (state != ESP_ZB_ZCL_STATUS_SUCCESS)
     {
         ESP_LOGE(TAG, "Sending active power attribute report command failed!");
         return ESP_FAIL;
     }
-    
+
     return ESP_OK;
 }
 
@@ -84,7 +82,7 @@ static esp_err_t zb_update_uint64_metering(uint16_t attr_id, uint64_t value)
                                                              ESP_ZB_ZCL_CLUSTER_SERVER_ROLE,
                                                              attr_id, &value, false);
     /* Check for error */
-    if(state != ESP_ZB_ZCL_STATUS_SUCCESS)
+    if (state != ESP_ZB_ZCL_STATUS_SUCCESS)
     {
         ESP_LOGE(TAG, "Setting metering attribute failed!");
         return ESP_FAIL;
@@ -94,12 +92,12 @@ static esp_err_t zb_update_uint64_metering(uint16_t attr_id, uint64_t value)
     state = esp_zb_zcl_report_attr_cmd_req(&metering_cmd_req);
 
     /* Check for error */
-    if(state != ESP_ZB_ZCL_STATUS_SUCCESS)
+    if (state != ESP_ZB_ZCL_STATUS_SUCCESS)
     {
         ESP_LOGE(TAG, "Sending metering attribute report command failed!");
         return ESP_FAIL;
     }
-    
+
     return ESP_OK;
 }
 
@@ -114,7 +112,7 @@ esp_err_t zb_update_received_power(uint64_t received_power)
 }
 
 void zb_electrical_measurement_ep(esp_zb_ep_list_t *esp_zb_ep_list)
-{   
+{
     // cluster list
     esp_zb_cluster_list_t *esp_zb_cluster_list = esp_zb_zcl_cluster_list_create();
 
@@ -167,7 +165,7 @@ void zb_electrical_measurement_ep(esp_zb_ep_list_t *esp_zb_ep_list)
 }
 
 void zb_metering_ep(esp_zb_ep_list_t *esp_zb_ep_list)
-{   
+{
     // cluster list
     esp_zb_cluster_list_t *esp_zb_cluster_list = esp_zb_zcl_cluster_list_create();
 
@@ -216,7 +214,7 @@ void zb_metering_ep(esp_zb_ep_list_t *esp_zb_ep_list)
                                    3 /* 3 digits on the right */;
     ESP_ERROR_CHECK(esp_zb_cluster_add_attr(esp_zb_metering_cluster, ESP_ZB_ZCL_CLUSTER_ID_METERING, ESP_ZB_ZCL_ATTR_METERING_SUMMATION_FORMATTING_ID, ESP_ZB_ZCL_ATTR_TYPE_8BITMAP, ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, &summation_formatting));
     ESP_ERROR_CHECK(esp_zb_cluster_add_attr(esp_zb_metering_cluster, ESP_ZB_ZCL_CLUSTER_ID_METERING, ESP_ZB_ZCL_ATTR_METERING_DEMAND_FORMATTING_ID, ESP_ZB_ZCL_ATTR_TYPE_8BITMAP, ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, &summation_formatting));
-   
+
     uint32_t divisor = 1000; // we get the stuff in Wh and need kWh
     ESP_ERROR_CHECK(esp_zb_cluster_add_attr(esp_zb_metering_cluster, ESP_ZB_ZCL_CLUSTER_ID_METERING, ESP_ZB_ZCL_ATTR_METERING_DIVISOR_ID, ESP_ZB_ZCL_ATTR_TYPE_U24, ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY, &divisor));
 

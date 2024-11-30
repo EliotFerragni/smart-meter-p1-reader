@@ -2,7 +2,7 @@
 
 /**
  * @brief Init the reading and parsing of the data coming from the smartmeter
- * 
+ *
  * @param uart_rx_pin uart rx pin
  * @param uart_port_num  uart port number
  * @param uart_baudrate  uart baudrate

@@ -2,7 +2,7 @@
 #include "led_strip.h"
 #include "light_driver.h"
 
-static const char* TAG = "light_driver";
+static const char *TAG = "light_driver";
 
 #define NUM_LED_ESP32_H2_DEVKIT 1
 
@@ -16,37 +16,44 @@ typedef struct
 } rgb_color;
 
 static rgb_color colors[] = {
-    {   // RED
+    {
+        // RED
         .red = 255,
         .green = 0,
         .blue = 0,
     },
-    {   // GREEN
+    {
+        // GREEN
         .red = 0,
         .green = 255,
         .blue = 0,
     },
-    {   // BLUE
+    {
+        // BLUE
         .red = 0,
         .green = 0,
         .blue = 255,
     },
-    {   // YELLOW
+    {
+        // YELLOW
         .red = 255,
         .green = 255,
         .blue = 0,
     },
-    {   // LIGHT_BLUE
+    {
+        // LIGHT_BLUE
         .red = 0,
         .green = 255,
         .blue = 255,
     },
-    {   // MAGENTA
+    {
+        // MAGENTA
         .red = 255,
         .green = 0,
         .blue = 255,
     },
-    {   // WHITE
+    {
+        // WHITE
         .red = 255,
         .green = 255,
         .blue = 255,
@@ -63,8 +70,8 @@ void light_driver_set_led(color color, uint8_t intensity)
 
     intensity = intensity > 100 ? 100 : intensity;
     float new_intensity = (float)intensity / 100;
-    
-    const rgb_color* new_color = &colors[color];
+
+    const rgb_color *new_color = &colors[color];
 
     ESP_ERROR_CHECK(led_strip_set_pixel(s_led_strip, 0, new_color->red * new_intensity, new_color->green * new_intensity, new_color->blue * new_intensity));
     ESP_ERROR_CHECK(led_strip_refresh(s_led_strip));

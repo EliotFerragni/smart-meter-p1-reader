@@ -11,16 +11,16 @@ typedef enum
     BLUE,
     YELLOW,
     LIGHT_BLUE,
-	MAGENTA,
-	WHITE,
+    MAGENTA,
+    WHITE,
     NB_COLORS
 } color;
 
 /**
  * @brief Set led color
- * 
+ *
  * @param color New color. See color type
- * @param intensity New intensity. Percentage between 0-100 
+ * @param intensity New intensity. Percentage between 0-100
  */
 void light_driver_set_led(color color, uint8_t intensity);
 
