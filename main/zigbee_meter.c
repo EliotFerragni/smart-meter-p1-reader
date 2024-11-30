@@ -31,7 +31,7 @@ static esp_zb_zcl_report_attr_cmd_t electrical_measurement_cmd_req = {
         .zcl_basic_cmd.src_endpoint = HA_DLMS_ENDPOINT,
         .address_mode = ESP_ZB_APS_ADDR_MODE_DST_ADDR_ENDP_NOT_PRESENT,
         .clusterID = ESP_ZB_ZCL_CLUSTER_ID_ELECTRICAL_MEASUREMENT,
-        .cluster_role = ESP_ZB_ZCL_CLUSTER_SERVER_ROLE
+        .direction = ESP_ZB_ZCL_CMD_DIRECTION_TO_CLI
     };
 
 esp_err_t zb_update_total_active_power(int32_t power)
@@ -40,10 +40,10 @@ esp_err_t zb_update_total_active_power(int32_t power)
     electrical_measurement_cmd_req.attributeID = ESP_ZB_ZCL_ATTR_ELECTRICAL_MEASUREMENT_ACTIVE_POWER_ID;
 
     /* Write new local active power */
-    esp_zb_zcl_status_t state = esp_zb_zcl_set_attribute_val(electrical_measurement_cmd_req.zcl_basic_cmd.src_endpoint,
-                                                             electrical_measurement_cmd_req.clusterID,
-                                                             electrical_measurement_cmd_req.cluster_role,
-                                                             electrical_measurement_cmd_req.attributeID, &power, false);
+    esp_zb_zcl_status_t state = esp_zb_zcl_set_attribute_val(HA_DLMS_ENDPOINT,
+                                                             ESP_ZB_ZCL_CLUSTER_ID_ELECTRICAL_MEASUREMENT,
+                                                             ESP_ZB_ZCL_CLUSTER_SERVER_ROLE,
+                                                             ESP_ZB_ZCL_ATTR_ELECTRICAL_MEASUREMENT_ACTIVE_POWER_ID, &power, false);
  
     /* Check for error */
     if(state != ESP_ZB_ZCL_STATUS_SUCCESS)
@@ -109,6 +109,11 @@ void zb_electricity_meter_ep(esp_zb_ep_list_t *esp_zb_ep_list)
     esp_zb_attribute_list_t *esp_zb_identify_client_cluster = esp_zb_zcl_attr_list_create(ESP_ZB_ZCL_CLUSTER_ID_IDENTIFY);
     ESP_ERROR_CHECK(esp_zb_cluster_list_add_identify_cluster(esp_zb_cluster_list, esp_zb_identify_client_cluster, ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE));
 
+    esp_zb_endpoint_config_t ep_config;
+    ep_config.app_device_id = ESP_ZB_HA_METER_INTERFACE_DEVICE_ID;
+    ep_config.app_device_version = 1;
+    ep_config.app_profile_id = ESP_ZB_AF_HA_PROFILE_ID;
+    ep_config.endpoint = HA_DLMS_ENDPOINT;
     // Add everything to endpoint
-    ESP_ERROR_CHECK(esp_zb_ep_list_add_ep(esp_zb_ep_list, esp_zb_cluster_list, HA_DLMS_ENDPOINT, ESP_ZB_AF_HA_PROFILE_ID, ESP_ZB_HA_METER_INTERFACE_DEVICE_ID));
+    ESP_ERROR_CHECK(esp_zb_ep_list_add_ep(esp_zb_ep_list, esp_zb_cluster_list, ep_config));
 }
